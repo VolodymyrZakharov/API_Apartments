@@ -76,7 +76,6 @@ public class BuildingServiceImpl implements BuildingService {
     public void destroyBuildingById(Long id) {
         List<Apartment> apartments = apartmentRepository.findAllByBuilding_Id(id);
         List<Owner> owners = ownerRepository.findAllByApartmentIn(apartments);
-        OwnerService ownerService = new OwnerServiceImpl();
 
         owners.stream()
                 .forEach(o -> o.setApartment(null));
