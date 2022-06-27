@@ -80,7 +80,7 @@ public class OwnerServiceImpl implements OwnerService {
 
         if (owner.getApartment().getId() != apartmentId)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Owner with id [%s] is registered in another apartment", ownerId));
+                    String.format("Owner with id [%s] is registered in another apartment with id [%s]", ownerId, ownerRepository.findById(ownerId)));
 
         owner.setApartment(null);
         ownerRepository.save(owner);

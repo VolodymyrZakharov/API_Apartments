@@ -4,9 +4,12 @@ import api_apartments.dto.BuildingRequestDTO;
 import api_apartments.dto.BuildingResponseDTO;
 import api_apartments.entity.Apartment;
 import api_apartments.entity.Building;
+import api_apartments.entity.Owner;
 import api_apartments.repository.ApartmentRepository;
 import api_apartments.repository.BuildingRepository;
+import api_apartments.repository.OwnerRepository;
 import api_apartments.service.BuildingService;
+import api_apartments.service.OwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,9 @@ public class BuildingServiceImpl implements BuildingService {
 
     @Autowired
     private ApartmentRepository apartmentRepository;
+
+    @Autowired
+    private OwnerRepository ownerRepository;
 
     @Override
     public void createBuilding(BuildingRequestDTO request, int apartmentsCount) {
@@ -68,7 +74,16 @@ public class BuildingServiceImpl implements BuildingService {
 
     @Override
     public void destroyBuildingById(Long id) {
-        Building building = buildingRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        buildingRepository.delete(building);
+        List<Apartment> apartments = apartmentRepository.findAllByBuilding_Id(id);
+        List<Owner> owners = ownerRepository.findAllByApartmentIn(apartments);
+        OwnerService ownerService = new OwnerServiceImpl();
+
+        owners.stream()
+                .forEach(o -> o.setApartment(null));
+
+        apartments.stream()
+                .forEach(a -> apartmentRepository.delete(a));
+
+        buildingRepository.deleteById(id);
     }
 }
