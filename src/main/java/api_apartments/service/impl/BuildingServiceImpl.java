@@ -11,6 +11,7 @@ import api_apartments.service.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
@@ -91,39 +92,38 @@ public class BuildingServiceImpl implements BuildingService {
 
         request.stream()
                 .filter(x -> buildingRepository.findByStreetAndHouse(x.getStreet(), x.getHouse()) == null)
-                .forEach(this::deploy);
+                .forEach(a -> {
+                    Building building = Building.builder()
+                            .street(a.getStreet())
+                            .house(a.getHouse())
+                            .build();
+                    buildingRepository.save(building);
+
+                    a.getApartments().stream()
+                            .forEach(x -> {
+                                        AtomicInteger number = new AtomicInteger(0);
+                                        Apartment apartment = Apartment.builder()
+                                                .apartmentNumber(number.incrementAndGet())
+                                                .hasBalcony(x.getHasBalcony())
+                                                .building(building)
+                                                .build();
+                                        apartmentRepository.save(apartment);
+
+                                        x.getOwners().stream()
+                                                .forEach(y -> DTOToOwner(y, apartment));
+                                    }
+                            );
+                });
     }
 
-    public void deploy(BuildingDeployRequestDTO request) {
-        Building building = Building.builder()
-                .street(request.getStreet())
-                .house(request.getHouse())
-                .build();
-        buildingRepository.save(building);
-
-        request.getApartments().stream()
-                .forEach(x -> {
-                            AtomicInteger number = new AtomicInteger(0);
-                            Apartment apartment = Apartment.builder()
-                                    .apartmentNumber(number.incrementAndGet())
-                                    .hasBalcony(x.getHasBalcony())
-                                    .building(building)
-                                    .build();
-                            apartmentRepository.save(apartment);
-
-                            x.getOwners().stream()
-                                    .forEach(y -> DTOToOwner(y, apartment));
-                        }
-                );
-    }
-
+    @Override
     public void DTOToOwner(OwnerRequestDTO request, Apartment apartment) {
         Owner owner = Owner.builder()
                 .name(request.getName())
                 .apartment(apartment)
                 .build();
 
-            ownerRepository.save(owner);
+        ownerRepository.save(owner);
     }
 }
 

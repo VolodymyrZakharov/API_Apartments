@@ -18,4 +18,5 @@ public interface BuildingService {
 
     void deployTheCity(List<BuildingDeployRequestDTO> buildings);
 
+    public void DTOToOwner(OwnerRequestDTO request, Apartment apartment);
 }
