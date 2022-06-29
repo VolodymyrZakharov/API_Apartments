@@ -122,12 +122,8 @@ public class BuildingServiceImpl implements BuildingService {
                 .name(request.getName())
                 .apartment(apartment)
                 .build();
-        try {
-            ownerRepository.save(owner);
-        } catch (Exception e) {
-            return;
-        }
 
+            ownerRepository.save(owner);
     }
 }
 
