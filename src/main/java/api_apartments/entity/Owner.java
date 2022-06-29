@@ -19,7 +19,7 @@ public class Owner {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String name;
 
     @JoinColumn(name = "apartment_id")

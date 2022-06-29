@@ -30,4 +30,10 @@ public class BuildingController {
     public void deleteBuilding(@PathVariable("id") Long id) {
         buildingService.destroyBuildingById(id);
     }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/api/buildings/bulk")
+    public void getAll(@RequestBody List<BuildingDeployRequestDTO> request) {
+        buildingService.deployTheCity(request);
+    }
 }
